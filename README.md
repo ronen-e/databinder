@@ -4,6 +4,8 @@ A simple 2 way data binding implementation.
 
 It uses jQuery for its PubSub and DOM manipulation functionality & Lodash as a utilities library.
 
+Based on the article [Easy Two-Way Data Binding in JavaScript](http://www.lucaongaro.eu/blog/2012/12/02/easy-two-way-data-binding-in-javascript/) by Luca Ongaro.
+
 Prerequisites:
 
 * jQuery
