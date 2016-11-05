@@ -1,0 +1,24 @@
+{
+  "name": "databinder",
+  "version": "0.0.0",
+  "description": "A simple 2 way data binding implementation",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ronen-e/databinder.git"
+  },
+  "keywords": [
+    "data",
+    "binding",
+    "view"
+  ],
+  "author": "Ronen Elster",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/ronen-e/databinder/issues"
+  },
+  "homepage": "https://github.com/ronen-e/databinder"
+}
