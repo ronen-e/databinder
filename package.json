@@ -16,7 +16,7 @@
     "view"
   ],
   "author": "Ronen Elster",
-  "license": "BSD-2-Clause",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/ronen-e/databinder/issues"
   },
