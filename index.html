@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <title>Data Binder</title>
-    <script src="scripts/vendor/jquery.min.js"></script>
-    <script src="scripts/vendor/lodash.min.js"></script>
-    <script src="scripts/databinder.js"></script>
-    <script src="scripts/databinder.bindings.js"></script>
-    <script src="scripts/viewmodel.js"></script>
-</head>
-
-<body>
-    <script src="scripts/site.js"></script>
-</body>
-
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+		<title>Data Binder</title>
+		<script src="scripts/vendor/lodash.min.js"></script>
+		<script src="scripts/vendor/jquery.min.js"></script>
+		<script src="scripts/databinder.constants.js"></script>
+		<script src="scripts/databinder.bindings.js"></script>
+		<script src="scripts/databinder.databinder.js"></script>
+		<script src="scripts/databinder.viewmodel.js"></script>
+	</head>
+	<body>
+		<button data-bind-f='{"click": "log"}'>Log</button>
+		<script src="scripts/app.js"></script>
+	</body>
 </html>
