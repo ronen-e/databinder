@@ -6,4 +6,7 @@
  */
 
 var vm = new ViewModel('f');
+vm.onlog = function(event) {
+	alert('vm.onlog called', event);
+}
 vm.applyBindings();

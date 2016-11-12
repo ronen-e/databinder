@@ -2,9 +2,11 @@
   "name": "databinder",
   "version": "0.0.0",
   "description": "A simple 2 way data binding implementation",
-  "main": "index.html",
+  "main": "scripts/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "babel scripts/es6 --out-dir scripts",
+	"dev": "babel scripts/es6 --watch --out-dir scripts",
+    "test": "echo 'no tests configured'"
   },
   "repository": {
     "type": "git",
@@ -15,10 +17,14 @@
     "binding",
     "view"
   ],
-  "author": "Ronen Elster",
+  "author": "Ronen Elster <alter.ronen@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/ronen-e/databinder/issues"
   },
-  "homepage": "https://github.com/ronen-e/databinder"
+  "homepage": "https://github.com/ronen-e/databinder",
+  "devDependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-preset-es2015": "^6.18.0"
+  }
 }
