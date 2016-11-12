@@ -1,13 +1,8 @@
-class ViewModel {
+class ViewModel extends DataBinder {
 
 	constructor(objectId) {
-		this.objectId = objectId;
+		super(objectId)
 		this.state = Object.create(null);
-		this.dataBinder = new DataBinder(this);
-	}
-	
-	applyBindings() {
-		this.dataBinder.applyBindings();
 	}
 
 	get(key) {
@@ -21,7 +16,7 @@ class ViewModel {
 	update(key, val) {
 		if (this.get(key) !== val) {
 			this.set(key, val);
-			this.dataBinder.trigger(this.objectId + ':model:change', [key, val]);
+			this.trigger(this.objectId + ':model:change', [key, val]);
 		}
 		return val;
 	}
