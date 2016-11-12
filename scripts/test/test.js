@@ -22,7 +22,7 @@ describe('ViewModel', function() {
         );
 
         try {
-            vm.dataBinder.removeEventListeners();
+            vm.removeEventListeners();
         } catch (e) {}
 
         vm = new ViewModel('f');
@@ -56,7 +56,7 @@ describe('ViewModel', function() {
     it('should trigger method with same name as event type (without arguments)', function() {
         vm.log = function log() {};
         var spy = sinon.spy(vm, 'log');
-        vm.dataBinder.pubSub.trigger('log', [1, 2]);
+        vm.pubSub.trigger('log', [1, 2]);
         expect(spy.called).to.be.true;
         expect(spy.args[0].length).to.equal(0);
         delete vm.log;
@@ -65,7 +65,7 @@ describe('ViewModel', function() {
     it('should trigger method with same name as event type with "on" prefix (with arguments)', function() {
         vm.onlog = function log() {};
         var spy = sinon.spy(vm, 'onlog');
-        vm.dataBinder.pubSub.trigger('log', [1, 2]);
+        vm.pubSub.trigger('log', [1, 2]);
         expect(spy.called).to.be.true;
         expect(spy.args[0].length).to.equal(3);
         expect(spy.args[0][1]).to.equal(1);

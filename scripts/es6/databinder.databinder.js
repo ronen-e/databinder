@@ -1,22 +1,22 @@
 class DataBinder {
-	constructor(viewModel) {
+	constructor(objectId) {
+		this.objectId = objectId;
 		this.view = document;
-		this.viewModel = viewModel;
-		this.pubSub = $(viewModel);
-		this.dataAttr = `bind-${viewModel.objectId}`;
+		this.pubSub = $(this);
+		this.dataAttr = `bind-${objectId}`;
 		this.viewSelector = `[data-${this.dataAttr}]`;  // bindings in the form: data-bind-<objectId>='{"key": "value"}'
 	}
 	
 	applyBindings() {
 
 		// listen to view events
-		applyViewBindings(this, this.viewModel, this.view);
+		applyViewBindings(this, this.view);
 
 		// listen to view model events
-		applyViewModelBindings(this, this.viewModel);
+		applyViewModelBindings(this);
 
 		// apply initial state
-		applyInitialState(this, this.viewModel);
+		applyInitialState(this);
 	}
 
 	trigger(eventName, args, originalEvent) {
@@ -31,7 +31,7 @@ class DataBinder {
 	}	
 }
 
-function applyViewBindings(dataBinder, viewModel, view) {
+function applyViewBindings(dataBinder, view) {
 	var { viewSelector, dataAttr } = dataBinder;
 	$(view).on(viewEventTypes, viewSelector, function domEvent(event) {
 		if (!dataBinder.domEvent) {
@@ -40,7 +40,7 @@ function applyViewBindings(dataBinder, viewModel, view) {
 
 		var $el = $(this);
 		var bindings = data(this, dataAttr);
-		var { objectId } = viewModel;
+		var { objectId } = dataBinder;
 
 		// exit if element or target has no bindings
 		if (!bindings) {
@@ -62,13 +62,12 @@ function applyViewBindings(dataBinder, viewModel, view) {
 	});
 }
 
-function applyViewModelBindings(dataBinder, viewModel) {
-	var { pubSub, viewSelector, dataAttr } = dataBinder;
-	var { objectId } = viewModel;
+function applyViewModelBindings(dataBinder) {
+	var { pubSub, viewSelector, dataAttr, objectId } = dataBinder;
 	
 	// listen to view change  events
 	pubSub.on(objectId + ':view:' + CHANGE, function viewChange(event, key, val) {
-		viewModel.update(key, val);
+		dataBinder.update(key, val);
 	});
 
 	// listen to model change events
@@ -88,14 +87,14 @@ function applyViewModelBindings(dataBinder, viewModel) {
 	});
 }
 
-function applyInitialState(dataBinder, viewModel) {
-	var { viewSelector, dataAttr } = dataBinder;
+function applyInitialState(dataBinder) {
+	var { viewSelector, dataAttr, objectId } = dataBinder;
 	$(viewSelector).each((i, el) => {
 		_.forOwn(data(el, dataAttr), (key) => {
-			var val = viewModel.get(key);
+			var val = dataBinder.get(key);
 			
 			if (!_.isUndefined(val)) {
-				dataBinder.trigger(viewModel.objectId + ':model:' + CHANGE, [key, val]);
+				dataBinder.trigger(objectId + ':model:' + CHANGE, [key, val]);
 			}
 		});
 	});

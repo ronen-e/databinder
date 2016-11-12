@@ -4,21 +4,23 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var ViewModel = function () {
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var ViewModel = function (_DataBinder) {
+	_inherits(ViewModel, _DataBinder);
+
 	function ViewModel(objectId) {
 		_classCallCheck(this, ViewModel);
 
-		this.objectId = objectId;
-		this.state = Object.create(null);
-		this.dataBinder = new DataBinder(this);
+		var _this = _possibleConstructorReturn(this, (ViewModel.__proto__ || Object.getPrototypeOf(ViewModel)).call(this, objectId));
+
+		_this.state = Object.create(null);
+		return _this;
 	}
 
 	_createClass(ViewModel, [{
-		key: 'applyBindings',
-		value: function applyBindings() {
-			this.dataBinder.applyBindings();
-		}
-	}, {
 		key: 'get',
 		value: function get(key) {
 			return _.get(this.state, key);
@@ -33,14 +35,14 @@ var ViewModel = function () {
 		value: function update(key, val) {
 			if (this.get(key) !== val) {
 				this.set(key, val);
-				this.dataBinder.trigger(this.objectId + ':model:change', [key, val]);
+				this.trigger(this.objectId + ':model:change', [key, val]);
 			}
 			return val;
 		}
 	}]);
 
 	return ViewModel;
-}();
+}(DataBinder);
 
 // add Array functionality e.g ViewModel.push('key', item1, item2) 
 
