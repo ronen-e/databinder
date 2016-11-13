@@ -1,11 +1,11 @@
 {
   "name": "databinder",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple 2 way data binding implementation",
   "main": "scripts/app.js",
   "scripts": {
-    "build": "babel scripts/es6 --out-dir scripts",
-	"dev": "babel scripts/es6 --watch --out-dir scripts",
+    "build": "babel scripts/es6 --out-dir scripts/compiled",
+	"dev": "babel scripts/es6 --watch --out-dir scripts/compiled",
     "test": "echo 'no tests configured'"
   },
   "repository": {
