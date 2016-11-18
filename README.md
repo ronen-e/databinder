@@ -36,4 +36,4 @@ This implementation uses the document object as the view object by default.
 This means all DOM events which bubble up to the document will be checked for any bindings on the event target.
 
 ### ViewModel
-The ViewModel instance contains both the application data (via `this.state`) and the pubSub functionality (via `this.databinder.pubSub`).
+The ViewModel instance contains both the application data (via `this.state`) and the pubSub functionality (via `this.pubSub`).
