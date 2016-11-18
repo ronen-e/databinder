@@ -4,8 +4,8 @@
   "description": "A simple 2 way data binding implementation",
   "main": "scripts/app.js",
   "scripts": {
-    "build": "gulp",
-    "dev": "babel scripts/es6 --watch --out-dir scripts/compiled",
+    "build": "gulp build",
+	"dev": "gulp dev",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
