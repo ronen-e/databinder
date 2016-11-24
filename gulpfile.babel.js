@@ -1,7 +1,6 @@
 import gulp from 'gulp';
 import babel from 'gulp-babel';
 import sourcemaps from 'gulp-sourcemaps';
-import concat from 'gulp-concat';
 import rollup from 'rollup-stream';
 import source from 'vinyl-source-stream';
 import buffer from 'vinyl-buffer';
