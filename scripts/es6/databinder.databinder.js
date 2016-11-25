@@ -1,5 +1,6 @@
 import Bindings from './databinder.bindings';
 import { CHANGE, CLICK, viewEventTypes } from './lib/events';
+import data from './lib/data';
 
 export default class DataBinder {
     constructor(objectId) {
@@ -36,6 +37,7 @@ export default class DataBinder {
 
 DataBinder.Bindings = Bindings;
 DataBinder.assign = (bindings) => Object.assign(DataBinder.Bindings, bindings);
+DataBinder.get = (path) => _.get(DataBinder.Bindings, path);
 
 function applyViewBindings(dataBinder, view) {
     var { viewSelector, dataAttr } = dataBinder;
@@ -46,23 +48,22 @@ function applyViewBindings(dataBinder, view) {
 
         var el = this;
         var $el = $(el);
-        var bindings = data(el, dataAttr);
-        var { objectId } = dataBinder;
+        var dataBindings = data(el, dataAttr);
 
         // exit if element or target has no bindings
-        if (!bindings) {
+        if (!dataBindings) {
             return;
         }
 
-        _.forOwn(bindings, (key, binding) => {
-            var module = _.get(DataBinder.Bindings, `view.${binding}`);
+        _.forOwn(dataBindings, (key, binding) => {
+            var module = DataBinder.get('view.' + binding);
             if (module && module.eventType === event.type) {
                 module.action({
                     el,
                     $el,
                     dataBinder,
                     event,
-                    eventName: `${objectId}:view:${event.type}`,
+                    eventName: `${dataBinder.objectId}:view:${event.type}`,
                     key
                 });
             }
@@ -70,20 +71,27 @@ function applyViewBindings(dataBinder, view) {
     });
 }
 
-function applyViewModelBindings(dataBinder) {
-    var { pubSub, viewSelector, dataAttr, objectId } = dataBinder;
+function applyViewModelBindings(viewModel) {
+    var { pubSub, viewSelector, dataAttr, objectId } = viewModel;
 
-    // listen to view change  events
-    pubSub.on(objectId + ':view:' + CHANGE, function viewChange(event, key, val) {
-        dataBinder.update(key, val);
+    // listen to view change events and trigger update
+    pubSub.on(`${objectId}:view:${CHANGE}`, function viewChange(event, key, val) {
+        viewModel.update(key, val);
     });
 
     // listen to model change events
-    pubSub.on(objectId + ':model:' + CHANGE, function modelChange(event, key, val) {
-        $(viewSelector).each(function updateDOM(i, el) {
-            _.forOwn(data(el, dataAttr), function(bindKey, binding) {
-                var module = _.get(DataBinder.Bindings, 'model.' + binding);
-                if (module && key === bindKey) {
+    pubSub.on(`${objectId}:model:${CHANGE}`, function modelChange(event, key, val) {
+
+		// apply bindings to DOM
+		$(viewSelector).each(function updateDOM(i, el) {
+			let dataBindings = data(el, dataAttr);
+            _.forOwn(dataBindings, function(bindKey, bindName) {
+				if (key !== bindKey) {
+					return;
+				}
+				// get binding module and call module action if binding key matches
+                var module = DataBinder.get('model.' + bindName);
+                if (module) {
                     module.action({
                         el,
                         $el: $(el),
@@ -96,19 +104,18 @@ function applyViewModelBindings(dataBinder) {
     });
 }
 
-function applyInitialState(dataBinder) {
-    var { viewSelector, dataAttr, objectId } = dataBinder;
+function applyInitialState(viewModel) {
+    var { viewSelector, dataAttr, objectId } = viewModel;
     $(viewSelector).each((i, el) => {
-        _.forOwn(data(el, dataAttr), (key) => {
-            var val = dataBinder.get(key);
+		let dataBindings = data(el, dataAttr);
+		
+		// iterate over bindings and trigger change on the view model
+        _.forOwn(dataBindings, (key) => {
+            var val = viewModel.get(key);
 
             if (!_.isUndefined(val)) {
-                dataBinder.trigger(objectId + ':model:' + CHANGE, [key, val]);
+                viewModel.trigger(`${objectId}:model:${CHANGE}`, [key, val]);
             }
         });
     });
-}
-
-function data(el, dataAttr) {
-    return $(el).data(dataAttr);
 }

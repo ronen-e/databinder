@@ -2,6 +2,8 @@
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
@@ -19,6 +21,8 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     var CLICK = 'click';
     var viewEventTypes = [CHANGE, CLICK].join(' ');
 
+    // describes how events are triggered on the databinder after changes to the DOM
+    // a binding matches a single DOM event (currently click and change are supported).
     var view = {
         value: Binding(function (_ref) {
             var dataBinder = _ref.dataBinder,
@@ -65,7 +69,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 key = _ref5.key,
                 event = _ref5.event;
 
-            dataBinder.trigger(key, null, event);
+            dataBinder.trigger(key, [], event);
         }, CHANGE),
 
         click: Binding(function (_ref6) {
@@ -73,10 +77,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
                 key = _ref6.key,
                 event = _ref6.event;
 
-            dataBinder.trigger(key, null, event);
+            dataBinder.trigger(key, [], event);
         }, CLICK)
     };
 
+    // describes how bound elements binding are affected by model state change
     var model = {
         value: Binding(function (_ref7) {
             var el = _ref7.el,
@@ -117,6 +122,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     };
 
     var Bindings = { view: view, model: model };
+
+    // get DOM element bindings
+    function data(el, dataAttr) {
+        return $(el).data(dataAttr);
+    }
 
     var DataBinder = function () {
         function DataBinder(objectId) {
@@ -168,6 +178,9 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     DataBinder.assign = function (bindings) {
         return Object.assign(DataBinder.Bindings, bindings);
     };
+    DataBinder.get = function (path) {
+        return _.get(DataBinder.Bindings, path);
+    };
 
     function applyViewBindings(dataBinder, view) {
         var viewSelector = dataBinder.viewSelector,
@@ -180,24 +193,22 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
             var el = this;
             var $el = $(el);
-            var bindings = data(el, dataAttr);
-            var objectId = dataBinder.objectId;
+            var dataBindings = data(el, dataAttr);
 
             // exit if element or target has no bindings
-
-            if (!bindings) {
+            if (!dataBindings) {
                 return;
             }
 
-            _.forOwn(bindings, function (key, binding) {
-                var module = _.get(DataBinder.Bindings, 'view.' + binding);
+            _.forOwn(dataBindings, function (key, binding) {
+                var module = DataBinder.get('view.' + binding);
                 if (module && module.eventType === event.type) {
                     module.action({
                         el: el,
                         $el: $el,
                         dataBinder: dataBinder,
                         event: event,
-                        eventName: objectId + ':view:' + event.type,
+                        eventName: dataBinder.objectId + ':view:' + event.type,
                         key: key
                     });
                 }
@@ -205,24 +216,31 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         });
     }
 
-    function applyViewModelBindings(dataBinder) {
-        var pubSub = dataBinder.pubSub,
-            viewSelector = dataBinder.viewSelector,
-            dataAttr = dataBinder.dataAttr,
-            objectId = dataBinder.objectId;
+    function applyViewModelBindings(viewModel) {
+        var pubSub = viewModel.pubSub,
+            viewSelector = viewModel.viewSelector,
+            dataAttr = viewModel.dataAttr,
+            objectId = viewModel.objectId;
 
-        // listen to view change  events
+        // listen to view change events and trigger update
 
         pubSub.on(objectId + ':view:' + CHANGE, function viewChange(event, key, val) {
-            dataBinder.update(key, val);
+            viewModel.update(key, val);
         });
 
         // listen to model change events
         pubSub.on(objectId + ':model:' + CHANGE, function modelChange(event, key, val) {
+
+            // apply bindings to DOM
             $(viewSelector).each(function updateDOM(i, el) {
-                _.forOwn(data(el, dataAttr), function (bindKey, binding) {
-                    var module = _.get(DataBinder.Bindings, 'model.' + binding);
-                    if (module && key === bindKey) {
+                var dataBindings = data(el, dataAttr);
+                _.forOwn(dataBindings, function (bindKey, bindName) {
+                    if (key !== bindKey) {
+                        return;
+                    }
+                    // get binding module and call module action if binding key matches
+                    var module = DataBinder.get('model.' + bindName);
+                    if (module) {
                         module.action({
                             el: el,
                             $el: $(el),
@@ -235,24 +253,23 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
         });
     }
 
-    function applyInitialState(dataBinder) {
-        var viewSelector = dataBinder.viewSelector,
-            dataAttr = dataBinder.dataAttr,
-            objectId = dataBinder.objectId;
+    function applyInitialState(viewModel) {
+        var viewSelector = viewModel.viewSelector,
+            dataAttr = viewModel.dataAttr,
+            objectId = viewModel.objectId;
 
         $(viewSelector).each(function (i, el) {
-            _.forOwn(data(el, dataAttr), function (key) {
-                var val = dataBinder.get(key);
+            var dataBindings = data(el, dataAttr);
+
+            // iterate over bindings and trigger change on the view model
+            _.forOwn(dataBindings, function (key) {
+                var val = viewModel.get(key);
 
                 if (!_.isUndefined(val)) {
-                    dataBinder.trigger(objectId + ':model:' + CHANGE, [key, val]);
+                    viewModel.trigger(objectId + ':model:' + CHANGE, [key, val]);
                 }
             });
         });
-    }
-
-    function data(el, dataAttr) {
-        return $(el).data(dataAttr);
     }
 
     var ViewModel = function (_DataBinder) {
@@ -297,7 +314,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
     ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'slice', 'unshift'].forEach(function (method) {
         Object.defineProperty(ViewModel.prototype, method, {
             value: function value(key) {
-                var val = this.get(key).slice();
+                var val = [].concat(_toConsumableArray(this.get(key)));
 
                 for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
                     args[_key - 1] = arguments[_key];

@@ -28,7 +28,7 @@ class ViewModel extends DataBinder {
 ['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'slice', 'unshift'].forEach(method => {
     Object.defineProperty(ViewModel.prototype, method, {
         value: function(key, ...args) {
-            var val = this.get(key).slice();
+            var val = [...this.get(key)];
             Array.prototype[method].apply(val, args);
             return this.update(key, val);
         }
