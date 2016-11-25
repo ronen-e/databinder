@@ -1,6 +1,8 @@
 import Binding from './binding';
 import {CHANGE, CLICK} from './events';
 
+// describes how events are triggered on the databinder after changes to the DOM
+// a binding matches a single DOM event (currently click and change are supported).
 var view = {
 	value: Binding(({ dataBinder, eventName, key, el, event }) => {
 		dataBinder.trigger(eventName, [key, el.value], event);
@@ -19,11 +21,11 @@ var view = {
 	}, CHANGE),
 
 	fn: Binding(({ dataBinder, key, event }) => {
-		dataBinder.trigger(key, null, event);
+		dataBinder.trigger(key, [], event);
 	}, CHANGE),
 
 	click: Binding(({ dataBinder, key, event }) => {
-		dataBinder.trigger(key, null, event);
+		dataBinder.trigger(key, [], event);
 	}, CLICK)
 };
 

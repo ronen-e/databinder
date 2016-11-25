@@ -1,5 +1,6 @@
 import Binding from './binding';
 
+// describes how bound elements binding are affected by model state change
 var model = {
 	value: Binding(({ el, val }) => {
 		el.value = val;
